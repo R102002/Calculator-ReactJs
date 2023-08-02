@@ -3,7 +3,13 @@ import "./App.css";
 
 const App = () => {
   const [result, setResult] = useState("");
+
   const handleClick = (e) => {
+    const allowedChars = /[0-9+\-*/.]/;
+    if (!allowedChars.test(e.target.name)) {
+      window.alert("Special characters and text are not allowed.");
+      return;
+    }
     setResult(result.concat(e.target.name));
   };
 
@@ -17,19 +23,55 @@ const App = () => {
 
   const calculate = () => {
     try {
+      if (result === "") {
+        window.alert("Input cannot be empty");
+        return;
+      }
+
+      const operators = /[+\-*/]/;
+      const lastChar = result.charAt(result.length - 1);
+      if (operators.test(lastChar)) {
+        window.alert("Incomplete input");
+        return;
+      }
+
+      try {
+        eval(result);
+      } catch (err) {
+        window.alert("Invalid input");
+        return;
+      }
+
+      if (result.includes("/0")) {
+        window.alert("Division by zero is not allowed");
+        return;
+      }
+
       setResult(eval(result).toString());
     } catch (err) {
-      setResult("syntax error");
+      setResult("Syntax Error");
     }
   };
+
+  const handleKeyboardInput = (e) => {
+    const allowedChars = /[0-9+\-*/.=]/;
+    if (!allowedChars.test(e.key)) {
+      window.alert("Special characters and text are not allowed.");
+      e.preventDefault();
+      return;
+    }
+    if (e.key === "=" || e.key === "Enter") {
+      e.preventDefault();
+      calculate();
+    } else {
+      setResult(result.concat(e.key));
+    }
+  };
+
   return (
-    <div className="container">
+    <div className="container" onKeyDown={handleKeyboardInput} tabIndex="0">
       <form>
-        <input
-          className="current-operand output"
-          type={"text"}
-          value={result}
-        />
+        <input className="current-operand output" type={"text"} value={result} />
       </form>
       <div className="buttons">
         <button className="ac span-two" onClick={clear}>
@@ -90,3 +132,4 @@ const App = () => {
 };
 
 export default App;
+
